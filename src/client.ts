@@ -1,5 +1,29 @@
 import { createHmac } from "node:crypto";
 
+const ALLOWED_HOSTS = new Set([
+  "freedom24.com",
+  "tradernet.com",
+  "freedom24.de",
+  "freedom24.fr",
+  "freedom24.es",
+]);
+
+const ALLOWED_V1_COMMANDS = new Set([
+  "getSecurityInfo",
+  "tickerFinder",
+  "getHloc",
+  "getAlertsList",
+  "togglePriceAlert",
+]);
+
+const ALLOWED_V2_COMMANDS = new Set([
+  "getPositionJson",
+  "getNotifyOrderJson",
+  "putTradeOrder",
+  "delTradeOrder",
+  "putStopLoss",
+]);
+
 export class TradernetClient {
   constructor(
     private readonly publicKey: string,
@@ -18,6 +42,12 @@ export class TradernetClient {
       );
     }
 
+    if (!ALLOWED_HOSTS.has(host)) {
+      throw new Error(
+        `TRADERNET_HOST "${host}" is not allowed. Allowed hosts: ${[...ALLOWED_HOSTS].join(", ")}`,
+      );
+    }
+
     return new TradernetClient(publicKey, privateKey, host);
   }
 
@@ -25,20 +55,26 @@ export class TradernetClient {
     cmd: string,
     params: Record<string, unknown>,
   ): Promise<unknown> {
+    if (!ALLOWED_V1_COMMANDS.has(cmd)) {
+      throw new Error(`V1 command "${cmd}" is not allowed`);
+    }
+
     const q = JSON.stringify({ cmd, params });
     const url = `https://${this.host}/api/?q=${encodeURIComponent(q)}`;
+
+    const timestamp = Math.floor(Date.now() / 1000).toString();
 
     const res = await fetch(url, {
       method: "GET",
       headers: {
         "X-NtApi-PublicKey": this.publicKey,
-        "X-NtApi-Timestamp": Math.floor(Date.now() / 1000).toString(),
-        "X-NtApi-Sig": this.sign(q),
+        "X-NtApi-Timestamp": timestamp,
+        "X-NtApi-Sig": this.sign(timestamp),
       },
     });
 
     if (!res.ok) {
-      throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+      throw new Error(`API error: ${cmd} returned HTTP ${res.status}`);
     }
 
     return res.json();
@@ -48,6 +84,10 @@ export class TradernetClient {
     cmd: string,
     params: Record<string, unknown>,
   ): Promise<unknown> {
+    if (!ALLOWED_V2_COMMANDS.has(cmd)) {
+      throw new Error(`V2 command "${cmd}" is not allowed`);
+    }
+
     const body = JSON.stringify(params);
     const timestamp = Math.floor(Date.now() / 1000).toString();
     const sig = this.sign(body + timestamp);
@@ -66,7 +106,7 @@ export class TradernetClient {
     });
 
     if (!res.ok) {
-      throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+      throw new Error(`API error: ${cmd} returned HTTP ${res.status}`);
     }
 
     return res.json();
@@ -111,12 +151,12 @@ export class TradernetClient {
         }
       });
 
-      ws.addEventListener("error", (err) => {
+      ws.addEventListener("error", () => {
         if (!settled) {
           settled = true;
           clearTimeout(timer);
           ws.close();
-          reject(new Error(`WebSocket error: ${err}`));
+          reject(new Error(`WebSocket connection failed for ${ticker}`));
         }
       });
     });

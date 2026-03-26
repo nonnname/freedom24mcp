@@ -106,9 +106,11 @@ export function registerMarketDataTools(
         timeout_ms: z
           .number()
           .int()
+          .min(500)
+          .max(30000)
           .optional()
           .default(3000)
-          .describe("Timeout in milliseconds to wait for data"),
+          .describe("Timeout in milliseconds to wait for data (500–30000)"),
       },
       annotations: { readOnlyHint: true },
     },

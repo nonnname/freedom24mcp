@@ -1,37 +1,33 @@
 # Freedom24 MCP Server
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 MCP server for the [Freedom24/Tradernet](https://freedom24.com) broker API. Provides market data, portfolio, trading, and alert tools via the [Model Context Protocol](https://modelcontextprotocol.io).
 
 ## Prerequisites
 
 - Node.js 22+
-- Freedom24 API keys ([generate here](https://freedom24.com/tradernet-api/auth-api))
+- Freedom24 API keys ([settings → API](https://freedom24.com/settings/api))
 
 ## Setup
 
 ```bash
+git clone https://github.com/nicksheffield/freedom24mcp.git
+cd freedom24mcp
 npm install
 npm run build
 ```
 
-Set environment variables:
+## Usage with Claude Desktop
 
-```bash
-export TRADERNET_PUBLIC_KEY="your-public-key"
-export TRADERNET_PRIVATE_KEY="your-private-key"
-export TRADERNET_HOST="freedom24.com"  # optional, defaults to freedom24.com
-```
-
-## Usage with Claude Code
-
-Add to your MCP server configuration:
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
 
 ```json
 {
   "mcpServers": {
     "freedom24": {
       "command": "node",
-      "args": ["/path/to/freedom24mcp/dist/index.js"],
+      "args": ["/absolute/path/to/freedom24mcp/dist/index.js"],
       "env": {
         "TRADERNET_PUBLIC_KEY": "your-public-key",
         "TRADERNET_PRIVATE_KEY": "your-private-key"
@@ -41,9 +37,27 @@ Add to your MCP server configuration:
 }
 ```
 
+Restart Claude Desktop after saving.
+
+## Usage with Claude Code
+
+```bash
+claude mcp add freedom24 node /absolute/path/to/freedom24mcp/dist/index.js \
+  -e TRADERNET_PUBLIC_KEY=your-public-key \
+  -e TRADERNET_PRIVATE_KEY=your-private-key
+```
+
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `TRADERNET_PUBLIC_KEY` | Yes | API public key from Freedom24 |
+| `TRADERNET_PRIVATE_KEY` | Yes | API private key from Freedom24 |
+| `TRADERNET_HOST` | No | API host, defaults to `freedom24.com` |
+
 ## Tools
 
-### Market Data
+### Market Data (read-only)
 
 | Tool | Description |
 |------|-------------|
@@ -52,14 +66,14 @@ Add to your MCP server configuration:
 | `get_candles` | Get OHLCV candlestick data (1m, 5m, 15m, 1h, 1d) |
 | `get_order_book` | Get current bid/ask order book via WebSocket |
 
-### Portfolio
+### Portfolio (read-only)
 
 | Tool | Description |
 |------|-------------|
 | `get_portfolio` | Get current positions and account info |
 | `get_orders` | Get order history and active orders |
 
-### Trading (require `confirm: true`)
+### Trading (destructive — require `confirm: true`)
 
 | Tool | Description |
 |------|-------------|
@@ -75,7 +89,20 @@ Add to your MCP server configuration:
 | `add_price_alert` | Create a new price alert |
 | `delete_price_alert` | Delete a price alert (requires `confirm: true`) |
 
+## Security
+
+- All API calls use HMAC-SHA256 signed requests
+- API keys are read from environment variables, never hardcoded
+- Host validated against an allowlist of known Freedom24 domains
+- API commands validated against an allowlist to prevent misuse
+- Destructive actions (trading, deleting) require explicit `confirm: true` parameter
+- Error messages are sanitized to avoid leaking internal details
+
 ## API Reference
 
 - [Tradernet API Documentation](https://freedom24.com/tradernet-api/)
-- [WS Client (GitHub)](https://github.com/tradernet-api/tn-ws-nodejs)
+- [Official WS Client](https://github.com/tradernet-api/tn-ws-nodejs)
+
+## License
+
+[MIT](LICENSE) — Sergey Zhdanov

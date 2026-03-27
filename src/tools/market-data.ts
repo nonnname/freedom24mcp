@@ -15,7 +15,7 @@ export function registerMarketDataTools(
     },
     async ({ ticker }) => {
       try {
-        const result = await client.callV1("getSecurityInfo", {
+        const result = await client.callApi("getSecurityInfo", {
           ticker,
           sup: true,
         });
@@ -42,7 +42,7 @@ export function registerMarketDataTools(
     },
     async ({ text }) => {
       try {
-        const result = await client.callV1("tickerFinder", { text });
+        const result = await client.callApi("tickerFinder", { text });
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       } catch (e) {
         return {
@@ -79,7 +79,7 @@ export function registerMarketDataTools(
     },
     async ({ ticker, timeframe, date_from, date_to, count }) => {
       try {
-        const result = await client.callV1("getHloc", {
+        const result = await client.callApi("getHloc", {
           id: ticker,
           count,
           timeframe: Number(timeframe),

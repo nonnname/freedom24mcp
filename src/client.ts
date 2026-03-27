@@ -8,15 +8,12 @@ const ALLOWED_HOSTS = new Set([
   "freedom24.es",
 ]);
 
-const ALLOWED_V1_COMMANDS = new Set([
+const ALLOWED_COMMANDS = new Set([
   "getSecurityInfo",
   "tickerFinder",
   "getHloc",
   "getAlertsList",
   "togglePriceAlert",
-]);
-
-const ALLOWED_V2_COMMANDS = new Set([
   "getPositionJson",
   "getNotifyOrderJson",
   "putTradeOrder",
@@ -51,48 +48,18 @@ export class TradernetClient {
     return new TradernetClient(publicKey, privateKey, host);
   }
 
-  async callV1(
+  async callApi(
     cmd: string,
     params: Record<string, unknown>,
   ): Promise<unknown> {
-    if (!ALLOWED_V1_COMMANDS.has(cmd)) {
-      throw new Error(`V1 command "${cmd}" is not allowed`);
-    }
-
-    const q = JSON.stringify({ cmd, params });
-    const url = `https://${this.host}/api/?q=${encodeURIComponent(q)}`;
-
-    const timestamp = Math.floor(Date.now() / 1000).toString();
-
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        "X-NtApi-PublicKey": this.publicKey,
-        "X-NtApi-Timestamp": timestamp,
-        "X-NtApi-Sig": this.sign(timestamp),
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error(`API error: ${cmd} returned HTTP ${res.status}`);
-    }
-
-    return res.json();
-  }
-
-  async callV2(
-    cmd: string,
-    params: Record<string, unknown>,
-  ): Promise<unknown> {
-    if (!ALLOWED_V2_COMMANDS.has(cmd)) {
-      throw new Error(`V2 command "${cmd}" is not allowed`);
+    if (!ALLOWED_COMMANDS.has(cmd)) {
+      throw new Error(`Command "${cmd}" is not allowed`);
     }
 
     const body = JSON.stringify(params);
     const timestamp = Math.floor(Date.now() / 1000).toString();
-    const sig = this.sign(body + timestamp);
 
-    const url = `https://${this.host}/api/v2/cmd/${cmd}`;
+    const url = `https://${this.host}/api/${cmd}`;
 
     const res = await fetch(url, {
       method: "POST",
@@ -100,7 +67,7 @@ export class TradernetClient {
         "Content-Type": "application/json",
         "X-NtApi-PublicKey": this.publicKey,
         "X-NtApi-Timestamp": timestamp,
-        "X-NtApi-Sig": sig,
+        "X-NtApi-Sig": this.sign(body + timestamp),
       },
       body,
     });

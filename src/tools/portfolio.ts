@@ -14,7 +14,7 @@ export function registerPortfolioTools(
     },
     async () => {
       try {
-        const result = await client.callV2("getPositionJson", {});
+        const result = await client.callApi("getPositionJson", {});
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       } catch (e) {
         return {
@@ -40,7 +40,7 @@ export function registerPortfolioTools(
     },
     async ({ active_only }) => {
       try {
-        const result = await client.callV2("getNotifyOrderJson", {
+        const result = await client.callApi("getNotifyOrderJson", {
           active_only: active_only ? 1 : 0,
         });
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };

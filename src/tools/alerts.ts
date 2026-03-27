@@ -20,7 +20,7 @@ export function registerAlertTools(
     },
     async ({ ticker }) => {
       try {
-        const result = await client.callV1("getAlertsList", {
+        const result = await client.callApi("getAlertsList", {
           ticker: ticker ?? null,
         });
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
@@ -89,7 +89,7 @@ export function registerAlertTools(
       expire,
     }) => {
       try {
-        const result = await client.callV1("togglePriceAlert", {
+        const result = await client.callApi("togglePriceAlert", {
           ticker,
           price: { price: String(price) },
           trigger_type,
@@ -133,7 +133,7 @@ export function registerAlertTools(
       }
 
       try {
-        const result = await client.callV1("togglePriceAlert", {
+        const result = await client.callApi("togglePriceAlert", {
           id,
           del: true,
           quote_type: "ltp",

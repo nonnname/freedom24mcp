@@ -89,7 +89,7 @@ export function registerTradingTools(
         if (limit_price !== undefined) params.limit_price = limit_price;
         if (stop_price !== undefined) params.stop_price = stop_price;
 
-        const result = await client.callV2("putTradeOrder", params);
+        const result = await client.callApi("putTradeOrder", params);
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       } catch (e) {
         return {
@@ -125,7 +125,7 @@ export function registerTradingTools(
       }
 
       try {
-        const result = await client.callV2("delTradeOrder", { order_id });
+        const result = await client.callApi("delTradeOrder", { order_id });
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       } catch (e) {
         return {
@@ -188,7 +188,7 @@ export function registerTradingTools(
       }
 
       try {
-        const result = await client.callV2("putStopLoss", {
+        const result = await client.callApi("putStopLoss", {
           instr_name,
           take_profit: take_profit ?? null,
           stop_loss: stop_loss ?? null,

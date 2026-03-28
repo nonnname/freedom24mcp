@@ -1,10 +1,12 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { TradernetClient } from "../client.js";
+import { readonlyGuard } from "./readonly.js";
 
 export function registerAlertTools(
   server: McpServer,
   client: TradernetClient,
+  readonly: boolean,
 ): void {
   server.registerTool(
     "get_alerts",
@@ -88,6 +90,9 @@ export function registerAlertTools(
       alert_period,
       expire,
     }) => {
+      const guard = readonlyGuard(readonly);
+      if (guard) return guard;
+
       try {
         const result = await client.callApi("togglePriceAlert", {
           ticker,
@@ -111,26 +116,15 @@ export function registerAlertTools(
   server.registerTool(
     "delete_price_alert",
     {
-      description: "Delete an existing price alert. Destructive action — set confirm=true to execute.",
+      description: "Delete an existing price alert.",
       inputSchema: {
         id: z.number().int().describe("Alert ID to delete"),
-        confirm: z
-          .boolean()
-          .describe("Must be true to delete this alert"),
       },
       annotations: { destructiveHint: true, readOnlyHint: false },
     },
-    async ({ id, confirm }) => {
-      if (!confirm) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: "Alert not deleted. Set confirm=true to delete.",
-            },
-          ],
-        };
-      }
+    async ({ id }) => {
+      const guard = readonlyGuard(readonly);
+      if (guard) return guard;
 
       try {
         const result = await client.callApi("togglePriceAlert", {

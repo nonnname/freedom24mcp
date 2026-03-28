@@ -54,6 +54,7 @@ claude mcp add freedom24 node /absolute/path/to/freedom24mcp/dist/index.js \
 | `TRADERNET_PUBLIC_KEY` | Yes | API public key from Freedom24 |
 | `TRADERNET_PRIVATE_KEY` | Yes | API private key from Freedom24 |
 | `TRADERNET_HOST` | No | API host, defaults to `freedom24.com` |
+| `TRADERNET_READONLY` | No | Set to `true` to disable all write operations |
 
 ## Tools
 
@@ -73,7 +74,7 @@ claude mcp add freedom24 node /absolute/path/to/freedom24mcp/dist/index.js \
 | `get_portfolio` | Get current positions and account info |
 | `get_orders` | Get order history and active orders |
 
-### Trading (destructive — require `confirm: true`)
+### Trading
 
 | Tool | Description |
 |------|-------------|
@@ -87,7 +88,7 @@ claude mcp add freedom24 node /absolute/path/to/freedom24mcp/dist/index.js \
 |------|-------------|
 | `get_alerts` | List active price alerts |
 | `add_price_alert` | Create a new price alert |
-| `delete_price_alert` | Delete a price alert (requires `confirm: true`) |
+| `delete_price_alert` | Delete a price alert |
 
 ## Security
 
@@ -95,7 +96,6 @@ claude mcp add freedom24 node /absolute/path/to/freedom24mcp/dist/index.js \
 - API keys are read from environment variables, never hardcoded
 - Host validated against an allowlist of known Freedom24 domains
 - API commands validated against an allowlist to prevent misuse
-- Destructive actions (trading, deleting) require explicit `confirm: true` parameter
 - Error messages are sanitized to avoid leaking internal details
 
 ## API Reference

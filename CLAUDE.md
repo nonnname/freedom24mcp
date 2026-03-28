@@ -20,7 +20,6 @@ node dist/index.js
 ## Conventions
 
 - **All API calls** via POST to `https://{host}/api/{command}` with HMAC-SHA256 signing (payload + timestamp)
-- **Destructive actions** require `confirm: true` parameter — handler returns error text if false
 - All tool handlers return JSON as `{ content: [{ type: "text", text: ... }] }`
 - Errors returned as `{ isError: true, content: [...] }`, not thrown
 
@@ -29,6 +28,7 @@ node dist/index.js
 - `TRADERNET_PUBLIC_KEY` — required
 - `TRADERNET_PRIVATE_KEY` — required
 - `TRADERNET_HOST` — optional, defaults to `freedom24.com`
+- `TRADERNET_READONLY` — optional, `true` to disable write operations
 
 ## Testing
 

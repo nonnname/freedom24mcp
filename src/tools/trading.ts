@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { TradernetClient } from "../client.js";
+import { readonlyGuard } from "./readonly.js";
 
 const ACTION_MAP: Record<string, number> = {
   buy: 1,
@@ -25,11 +26,12 @@ const EXPIRATION_MAP: Record<string, number> = {
 export function registerTradingTools(
   server: McpServer,
   client: TradernetClient,
+  readonly: boolean,
 ): void {
   server.registerTool(
     "place_order",
     {
-      description: "Place a trade order (buy/sell). Destructive action — set confirm=true to execute.",
+      description: "Place a trade order (buy/sell).",
       inputSchema: {
         instr_name: z.string().describe("Instrument ticker, e.g. AAPL.US"),
         action: z
@@ -51,9 +53,6 @@ export function registerTradingTools(
           .enum(["day", "day_ext", "gtc"])
           .default("day")
           .describe("Order duration: day, day+extended, good-til-cancelled"),
-        confirm: z
-          .boolean()
-          .describe("Must be true to execute this order"),
       },
       annotations: { destructiveHint: true, readOnlyHint: false },
     },
@@ -65,18 +64,9 @@ export function registerTradingTools(
       limit_price,
       stop_price,
       expiration,
-      confirm,
     }) => {
-      if (!confirm) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: "Order not executed. Set confirm=true to place this order.",
-            },
-          ],
-        };
-      }
+      const guard = readonlyGuard(readonly);
+      if (guard) return guard;
 
       try {
         const params: Record<string, unknown> = {
@@ -103,26 +93,15 @@ export function registerTradingTools(
   server.registerTool(
     "cancel_order",
     {
-      description: "Cancel an existing order. Destructive action — set confirm=true to execute.",
+      description: "Cancel an existing order.",
       inputSchema: {
         order_id: z.number().int().describe("ID of the order to cancel"),
-        confirm: z
-          .boolean()
-          .describe("Must be true to cancel this order"),
       },
       annotations: { destructiveHint: true, readOnlyHint: false },
     },
-    async ({ order_id, confirm }) => {
-      if (!confirm) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: "Order not cancelled. Set confirm=true to cancel this order.",
-            },
-          ],
-        };
-      }
+    async ({ order_id }) => {
+      const guard = readonlyGuard(readonly);
+      if (guard) return guard;
 
       try {
         const result = await client.callApi("delTradeOrder", { order_id });
@@ -139,7 +118,7 @@ export function registerTradingTools(
   server.registerTool(
     "set_stop_loss",
     {
-      description: "Set stop-loss and/or take-profit on a position. Destructive action — set confirm=true to execute.",
+      description: "Set stop-loss and/or take-profit on a position.",
       inputSchema: {
         instr_name: z.string().describe("Instrument ticker, e.g. AAPL.US"),
         take_profit: z
@@ -162,9 +141,6 @@ export function registerTradingTools(
           .nullable()
           .optional()
           .describe("Trailing stop-loss percentage"),
-        confirm: z
-          .boolean()
-          .describe("Must be true to execute this action"),
       },
       annotations: { destructiveHint: true, readOnlyHint: false },
     },
@@ -174,18 +150,9 @@ export function registerTradingTools(
       stop_loss,
       stop_loss_percent,
       trailing_stop_percent,
-      confirm,
     }) => {
-      if (!confirm) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: "Stop-loss not set. Set confirm=true to execute.",
-            },
-          ],
-        };
-      }
+      const guard = readonlyGuard(readonly);
+      if (guard) return guard;
 
       try {
         const result = await client.callApi("putStopLoss", {

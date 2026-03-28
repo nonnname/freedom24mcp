@@ -8,6 +8,7 @@ import { registerPortfolioTools } from "./tools/portfolio.js";
 import { registerTradingTools } from "./tools/trading.js";
 import { registerAlertTools } from "./tools/alerts.js";
 
+const readonly = process.env.TRADERNET_READONLY === "true";
 const client = TradernetClient.fromEnv();
 
 const server = new McpServer({
@@ -17,8 +18,8 @@ const server = new McpServer({
 
 registerMarketDataTools(server, client);
 registerPortfolioTools(server, client);
-registerTradingTools(server, client);
-registerAlertTools(server, client);
+registerTradingTools(server, client, readonly);
+registerAlertTools(server, client, readonly);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);

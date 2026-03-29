@@ -12,7 +12,7 @@ MCP server for the [Freedom24/Tradernet](https://freedom24.com) broker API. Prov
 ## Setup
 
 ```bash
-git clone https://github.com/nicksheffield/freedom24mcp.git
+git clone https://github.com/nonnname/freedom24mcp.git
 cd freedom24mcp
 npm install
 npm run build
@@ -102,6 +102,10 @@ claude mcp add freedom24 node /absolute/path/to/freedom24mcp/dist/index.js \
 
 - [Tradernet API Documentation](https://freedom24.com/tradernet-api/)
 - [Official WS Client](https://github.com/tradernet-api/tn-ws-nodejs)
+
+## Disclaimer
+
+This is an unofficial open-source project, not affiliated with or endorsed by Freedom Finance / Freedom24. It interacts with live brokerage accounts via the Tradernet API. Trading on financial markets involves risk of loss. The authors bear no responsibility for any financial losses resulting from the use of this software. Use at your own risk and always verify data independently.
 
 ## License
 

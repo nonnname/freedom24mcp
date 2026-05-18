@@ -7,8 +7,9 @@ import { registerMarketDataTools } from "./tools/market-data.js";
 import { registerPortfolioTools } from "./tools/portfolio.js";
 import { registerTradingTools } from "./tools/trading.js";
 import { registerAlertTools } from "./tools/alerts.js";
+import { parseAllowTradingEnv } from "./trading-permissions.js";
 
-const readonly = process.env.TRADERNET_READONLY === "true";
+const readonly = !parseAllowTradingEnv(process.env.TRADERNET_ALLOW_TRADING);
 const client = TradernetClient.fromEnv();
 
 const server = new McpServer({

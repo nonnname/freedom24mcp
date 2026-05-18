@@ -54,7 +54,9 @@ claude mcp add freedom24 node /absolute/path/to/freedom24mcp/dist/index.js \
 | `TRADERNET_PUBLIC_KEY` | Yes | API public key from Freedom24 |
 | `TRADERNET_PRIVATE_KEY` | Yes | API private key from Freedom24 |
 | `TRADERNET_HOST` | No | API host, defaults to `freedom24.com` |
-| `TRADERNET_READONLY` | No | Set to `true` to disable all write operations |
+| `TRADERNET_ALLOW_TRADING` | No | Disabled by default. Set to `true`, `1`, `yes`, or `on` to register trading and write alert tools |
+
+By default, the server runs in read-only mode and does not register write tools.
 
 ## Tools
 
@@ -76,6 +78,8 @@ claude mcp add freedom24 node /absolute/path/to/freedom24mcp/dist/index.js \
 
 ### Trading
 
+Not registered when read-only mode is enabled.
+
 | Tool | Description |
 |------|-------------|
 | `place_order` | Place buy/sell order (market, limit, stop, stop-limit) |
@@ -83,6 +87,8 @@ claude mcp add freedom24 node /absolute/path/to/freedom24mcp/dist/index.js \
 | `set_stop_loss` | Set stop-loss and/or take-profit on a position |
 
 ### Alerts
+
+Write alert tools are not registered when read-only mode is enabled.
 
 | Tool | Description |
 |------|-------------|

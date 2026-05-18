@@ -1,7 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { TradernetClient } from "../client.js";
-import { readonlyGuard } from "./readonly.js";
 
 export function registerAlertTools(
   server: McpServer,
@@ -34,6 +33,8 @@ export function registerAlertTools(
       }
     },
   );
+
+  if (readonly) return;
 
   server.registerTool(
     "add_price_alert",
@@ -90,9 +91,6 @@ export function registerAlertTools(
       alert_period,
       expire,
     }) => {
-      const guard = readonlyGuard(readonly);
-      if (guard) return guard;
-
       try {
         const result = await client.callApi("togglePriceAlert", {
           ticker,
@@ -123,9 +121,6 @@ export function registerAlertTools(
       annotations: { destructiveHint: true, readOnlyHint: false },
     },
     async ({ id }) => {
-      const guard = readonlyGuard(readonly);
-      if (guard) return guard;
-
       try {
         const result = await client.callApi("togglePriceAlert", {
           id,

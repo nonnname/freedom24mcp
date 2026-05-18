@@ -1,7 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { TradernetClient } from "../client.js";
-import { readonlyGuard } from "./readonly.js";
 
 const ACTION_MAP: Record<string, number> = {
   buy: 1,
@@ -28,6 +27,8 @@ export function registerTradingTools(
   client: TradernetClient,
   readonly: boolean,
 ): void {
+  if (readonly) return;
+
   server.registerTool(
     "place_order",
     {
@@ -65,9 +66,6 @@ export function registerTradingTools(
       stop_price,
       expiration,
     }) => {
-      const guard = readonlyGuard(readonly);
-      if (guard) return guard;
-
       try {
         const params: Record<string, unknown> = {
           instr_name,
@@ -100,9 +98,6 @@ export function registerTradingTools(
       annotations: { destructiveHint: true, readOnlyHint: false },
     },
     async ({ order_id }) => {
-      const guard = readonlyGuard(readonly);
-      if (guard) return guard;
-
       try {
         const result = await client.callApi("delTradeOrder", { order_id });
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
@@ -151,9 +146,6 @@ export function registerTradingTools(
       stop_loss_percent,
       trailing_stop_percent,
     }) => {
-      const guard = readonlyGuard(readonly);
-      if (guard) return guard;
-
       try {
         const result = await client.callApi("putStopLoss", {
           instr_name,
